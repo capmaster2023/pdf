@@ -16,11 +16,13 @@ import com.pdfpocket.lite.pdf.PdfRendererSession
 import com.pdfpocket.lite.pdf.PdfSearchHit
 import com.pdfpocket.lite.storage.StorageRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import javax.inject.Inject
 
@@ -63,14 +65,20 @@ class ViewerViewModel @Inject constructor(
         _state.value = _state.value.copy(loading = true, error = null, needsPassword = false)
         runCatching {
             storage.persistPermission(uri)
-            if (password == null) {
-                renderer.open(uri)
+            tempFile?.delete()
+
+            tempFile = if (password == null) {
+                activePassword = null
+
+                withContext(Dispatchers.IO) {
+                    storage.copyToCache(uri, "viewer", "pdf")
+                }
             } else {
-                tempFile?.delete()
-                tempFile = pdfEngine.decryptToTemp(uri, password)
-                renderer.openFile(requireNotNull(tempFile))
                 activePassword = password
+                pdfEngine.decryptToTemp(uri, password)
             }
+
+            renderer.openFile(requireNotNull(tempFile))
             val metadata = getApplication<Application>().queryMetadata(uri)
             val old = documents.find(uri.toString())
             documents.record(uri.toString(), metadata.name, metadata.size, renderer.pageCount)
@@ -85,8 +93,25 @@ class ViewerViewModel @Inject constructor(
                 continuous = preferences.viewerMode == ViewerMode.CONTINUOUS
             )
         }.onFailure { error ->
-            val passwordError = error.javaClass.simpleName.contains("Password", true) ||
-                error.message?.contains("password", true) == true || error is SecurityException
+            val message = error.message.orEmpty()
+
+            val passwordError =
+                error.javaClass.simpleName.contains(
+                    "Password",
+                    ignoreCase = true
+                ) ||
+                    message.contains(
+                        "password",
+                        ignoreCase = true
+                    ) ||
+                    (
+                        error is SecurityException &&
+                            message.contains(
+                                "cannot create document",
+                                ignoreCase = true
+                            )
+                    )
+
             _state.value = _state.value.copy(
                 loading = false,
                 needsPassword = passwordError,

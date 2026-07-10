@@ -1,0 +1,5 @@
+-keep class com.tom_roush.pdfbox.** { *; }
+-dontwarn org.bouncycastle.**
+-dontwarn javax.imageio.**
+-keep class com.google.mlkit.** { *; }
+-keepattributes Signature,InnerClasses,EnclosingMethod

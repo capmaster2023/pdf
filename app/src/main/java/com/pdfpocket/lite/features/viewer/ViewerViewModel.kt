@@ -54,7 +54,7 @@ class ViewerViewModel @Inject constructor(
     val state: StateFlow<ViewerState> = _state.asStateFlow()
     private var tempFile: File? = null
     private var activePassword: String? = null
-    private val rawUri = Uri.decode(savedStateHandle.get<String>("uri").orEmpty())
+    private val rawUri = savedStateHandle.get<String>("uri").orEmpty()
 
     init {
         if (rawUri.isNotBlank()) open(Uri.parse(rawUri))

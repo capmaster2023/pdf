@@ -79,7 +79,7 @@ class ToolOperationViewModel @Inject constructor(private val engine: PdfEngine) 
         }
     }
 
-    private fun <T> launch(block: suspend () -> T, onSuccess: (T) -> Unit = {}) {
+    private fun <T> launch(onSuccess: (T) -> Unit = {}, block: suspend () -> T) {
         viewModelScope.launch {
             _state.value = _state.value.copy(processing = true, complete = false, error = null)
             runCatching { block() }.fold(

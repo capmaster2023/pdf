@@ -247,7 +247,7 @@ class PdfEngine @Inject constructor(
     ) = withContext(Dispatchers.IO) {
         load(source, password).use { document ->
             val form = document.documentCatalog.acroForm ?: error("No AcroForm")
-            values.forEach { (name, value) -> form.getField(name)?.value = value }
+            values.forEach { (name, value) -> form.getField(name)?.setValue(value) }
             if (flatten) form.flatten()
             storage.writeOutput(output) { document.save(it) }
         }

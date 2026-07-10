@@ -85,7 +85,7 @@ fun AppNavigation(incomingUri: Uri?, onIncomingConsumed: () -> Unit) {
                     }
                 )
             }
-            composable(Routes.FILES) { FilesScreen { navController.navigate(Routes.viewer(it.toString())) } }
+            composable(Routes.FILES) { FilesScreen(onOpen = { navController.navigate(Routes.viewer(it.toString())) }) }
             composable(Routes.TOOLS) {
                 ToolsScreen(
                     onTool = { navController.navigate(Routes.tool(it)) },
@@ -102,14 +102,14 @@ fun AppNavigation(incomingUri: Uri?, onIncomingConsumed: () -> Unit) {
                 )
             }
             composable(Routes.VIEWER, arguments = listOf(navArgument("uri") { type = NavType.StringType })) {
-                ViewerScreen { navController.popBackStack() }
+                ViewerScreen(onBack = { navController.popBackStack() })
             }
-            composable(Routes.IMAGES) { ImagesToPdfScreen { navController.popBackStack() } }
-            composable(Routes.SCANNER) { ScannerScreen { navController.popBackStack() } }
-            composable(Routes.OCR) { OcrScreen { navController.popBackStack() } }
-            composable(Routes.SIGNATURE) { SignatureScreen { navController.popBackStack() } }
+            composable(Routes.IMAGES) { ImagesToPdfScreen(onBack = { navController.popBackStack() }) }
+            composable(Routes.SCANNER) { ScannerScreen(onBack = { navController.popBackStack() }) }
+            composable(Routes.OCR) { OcrScreen(onBack = { navController.popBackStack() }) }
+            composable(Routes.SIGNATURE) { SignatureScreen(onBack = { navController.popBackStack() }) }
             composable(Routes.TOOL_OPERATION, arguments = listOf(navArgument("operation") { type = NavType.StringType })) { entry ->
-                ToolOperationScreen(entry.arguments?.getString("operation").orEmpty()) { navController.popBackStack() }
+                ToolOperationScreen(operation = entry.arguments?.getString("operation").orEmpty(), onBack = { navController.popBackStack() })
             }
             composable(Routes.PRIVACY) { PrivacyScreen { navController.popBackStack() } }
             composable(Routes.ABOUT) { AboutScreen { navController.popBackStack() } }

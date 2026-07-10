@@ -12,5 +12,5 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-rootProject.name = "PDFPocketLite"
+rootProject.name = "PdfPocketLite"
 include(":app")

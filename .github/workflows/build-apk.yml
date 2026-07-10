@@ -1,61 +1,48 @@
-name: Build debug APK
+name: Build APK
 
 on:
   push:
   pull_request:
   workflow_dispatch:
 
-permissions:
-  contents: read
-
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
     steps:
-      - name: Checkout
+      - name: Récupérer le dépôt
         uses: actions/checkout@v4
 
-      - name: Setup Java 21
+      - name: Installer JDK 21 (Temurin)
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '21'
 
-      - name: Setup Gradle
+      - name: Configurer Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Verify project files
-        run: |
-          test -f gradlew
-          test -f gradle/wrapper/gradle-wrapper.jar
-          test -f app/build.gradle.kts
-          chmod +x gradlew
-          ./gradlew --version
+      - name: Rendre gradlew exécutable
+        run: chmod +x gradlew
 
-      - name: Clean
-        run: ./gradlew clean --stacktrace
+      - name: Nettoyer
+        run: ./gradlew clean
 
-      - name: Unit tests
-        run: ./gradlew testDebugUnitTest --stacktrace
+      - name: Tests unitaires
+        run: ./gradlew testDebugUnitTest
 
-      - name: Build debug APK
-        run: ./gradlew assembleDebug --stacktrace
+      - name: Compiler l'APK debug
+        run: ./gradlew assembleDebug
 
-      - name: Upload APK
+      - name: Publier l'APK
         uses: actions/upload-artifact@v4
         with:
           name: pdf-pocket-lite-debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
-          if-no-files-found: error
-          retention-days: 30
 
-      - name: Upload test reports on failure
+      - name: Publier les rapports de tests (en cas d'échec)
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: pdf-pocket-lite-test-reports
-          path: |
-            app/build/reports/tests/
-            app/build/test-results/
+          name: rapports-tests
+          path: app/build/reports/
           if-no-files-found: ignore

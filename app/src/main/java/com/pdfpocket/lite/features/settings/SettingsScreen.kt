@@ -1,109 +1,168 @@
 package com.pdfpocket.lite.features.settings
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewModelScope
+import com.pdfpocket.lite.AppContainer
 import com.pdfpocket.lite.R
-import com.pdfpocket.lite.data.repository.ThemeMode
-import com.pdfpocket.lite.data.repository.ViewerMode
+import com.pdfpocket.lite.core.FileUtils
+import com.pdfpocket.lite.core.appViewModel
+import com.pdfpocket.lite.data.ThemeMode
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
-@Composable
-fun SettingsScreen(
-    onPrivacy: () -> Unit,
-    onAbout: () -> Unit,
-    viewModel: SettingsViewModel = hiltViewModel()
-) {
-    val settings by viewModel.settings.collectAsStateWithLifecycle()
-    var pinDialog by remember { mutableStateOf(false) }
+class SettingsViewModel(private val container: AppContainer) : ViewModel() {
 
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        item { Text(stringResource(R.string.settings), style = MaterialTheme.typography.headlineMedium) }
-        item { SectionTitle(R.string.theme) }
-        item {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                ThemeMode.entries.forEach { mode ->
-                    val label = when (mode) {
-                        ThemeMode.SYSTEM -> R.string.theme_system
-                        ThemeMode.LIGHT -> R.string.theme_light
-                        ThemeMode.DARK -> R.string.theme_dark
-                    }
-                    FilterChip(settings.theme == mode, { viewModel.setTheme(mode) }, { Text(stringResource(label)) })
-                }
-            }
-        }
-        item { SectionTitle(R.string.default_view_mode) }
-        item {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                ViewerMode.entries.forEach { mode ->
-                    val label = if (mode == ViewerMode.CONTINUOUS) R.string.continuous_mode else R.string.single_page_mode
-                    FilterChip(settings.viewerMode == mode, { viewModel.setViewerMode(mode) }, { Text(stringResource(label)) })
-                }
-            }
-        }
-        item { SettingSwitch(R.string.remember_last_page, settings.rememberLastPage, viewModel::setRemember) }
-        item { SectionTitle(R.string.app_lock) }
-        item { SettingSwitch(R.string.biometric_lock, settings.biometricLock, viewModel::setBiometric) }
-        item { SettingSwitch(R.string.pin_lock, settings.pinLock) { enabled -> if (enabled) pinDialog = true else viewModel.disablePin() } }
-        item { SectionTitle(R.string.screenshots) }
-        item { SettingSwitch(R.string.allow_screenshots, settings.allowScreenshots, viewModel::setScreenshots) }
-        item { OutlinedButton(onClick = viewModel::clearCache, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.clear_cache)) } }
-        item { OutlinedButton(onClick = viewModel::deleteSignatures, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.delete_signatures)) } }
-        item { OutlinedButton(onClick = viewModel::reset, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.reset_preferences)) } }
-        item { TextButton(onClick = onPrivacy, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.privacy)) } }
-        item { TextButton(onClick = onAbout, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.about)) } }
+    val themeMode = container.settings.themeMode
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ThemeMode.SYSTEM)
+
+    fun setTheme(mode: ThemeMode) {
+        viewModelScope.launch { container.settings.setThemeMode(mode) }
     }
 
-    if (pinDialog) {
-        var pin by remember { mutableStateOf("") }
-        var confirmation by remember { mutableStateOf("") }
+    fun clearHistory() {
+        viewModelScope.launch { container.documents.clearHistory() }
+    }
+
+    fun clearCache() {
+        viewModelScope.launch(Dispatchers.IO) { FileUtils.clearAppCache(container.app) }
+    }
+}
+
+@Composable
+fun SettingsScreen() {
+    val viewModel = appViewModel { SettingsViewModel(it) }
+    val themeMode by viewModel.themeMode.collectAsStateWithLifecycle()
+
+    var showClearHistoryDialog by remember { mutableStateOf(false) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(16.dp)
+    ) {
+        Text(
+            text = stringResource(R.string.tab_settings),
+            style = MaterialTheme.typography.headlineMedium
+        )
+
+        Text(
+            text = stringResource(R.string.theme_title),
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.padding(top = 24.dp, bottom = 8.dp)
+        )
+        ThemeOption(
+            label = stringResource(R.string.theme_system),
+            selected = themeMode == ThemeMode.SYSTEM,
+            onClick = { viewModel.setTheme(ThemeMode.SYSTEM) }
+        )
+        ThemeOption(
+            label = stringResource(R.string.theme_light),
+            selected = themeMode == ThemeMode.LIGHT,
+            onClick = { viewModel.setTheme(ThemeMode.LIGHT) }
+        )
+        ThemeOption(
+            label = stringResource(R.string.theme_dark),
+            selected = themeMode == ThemeMode.DARK,
+            onClick = { viewModel.setTheme(ThemeMode.DARK) }
+        )
+
+        HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
+
+        Text(
+            text = stringResource(R.string.storage_title),
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+        OutlinedButton(onClick = { viewModel.clearCache() }) {
+            Text(stringResource(R.string.clear_cache))
+        }
+        OutlinedButton(
+            onClick = { showClearHistoryDialog = true },
+            modifier = Modifier.padding(top = 8.dp)
+        ) {
+            Text(stringResource(R.string.clear_history))
+        }
+
+        HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
+
+        Text(
+            text = stringResource(R.string.privacy_title),
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+        Text(
+            text = stringResource(R.string.privacy_body),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
+
+        Text(
+            text = stringResource(R.string.about_version, "0.1.0"),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+
+    if (showClearHistoryDialog) {
         AlertDialog(
-            onDismissRequest = { pinDialog = false },
-            title = { Text(stringResource(R.string.set_pin)) },
-            text = {
-                Column {
-                    OutlinedTextField(
-                        pin,
-                        { value -> if (value.length <= 12 && value.all(Char::isDigit)) pin = value },
-                        label = { Text(stringResource(R.string.enter_pin)) },
-                        visualTransformation = PasswordVisualTransformation()
-                    )
-                    OutlinedTextField(
-                        confirmation,
-                        { value -> if (value.length <= 12 && value.all(Char::isDigit)) confirmation = value },
-                        label = { Text(stringResource(R.string.confirm_password)) },
-                        visualTransformation = PasswordVisualTransformation()
-                    )
-                }
-            },
+            onDismissRequest = { showClearHistoryDialog = false },
+            title = { Text(stringResource(R.string.clear_history)) },
+            text = { Text(stringResource(R.string.clear_history_message)) },
             confirmButton = {
-                TextButton(
-                    onClick = { viewModel.setPin(pin); pinDialog = false },
-                    enabled = pin.length >= 4 && pin == confirmation
-                ) { Text(stringResource(R.string.confirm)) }
+                TextButton(onClick = {
+                    viewModel.clearHistory()
+                    showClearHistoryDialog = false
+                }) { Text(stringResource(R.string.confirm)) }
             },
-            dismissButton = { TextButton(onClick = { pinDialog = false }) { Text(stringResource(R.string.cancel)) } }
+            dismissButton = {
+                TextButton(onClick = { showClearHistoryDialog = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
         )
     }
 }
 
 @Composable
-private fun SectionTitle(id: Int) { Text(stringResource(id), style = MaterialTheme.typography.titleMedium) }
-
-@Composable
-private fun SettingSwitch(label: Int, checked: Boolean, onChange: (Boolean) -> Unit) {
-    Row(Modifier.fillMaxWidth().padding(vertical = 6.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-        Text(stringResource(label), Modifier.weight(1f))
-        Switch(checked = checked, onCheckedChange = onChange)
+private fun ThemeOption(label: String, selected: Boolean, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        RadioButton(selected = selected, onClick = onClick)
+        Text(text = label, modifier = Modifier.padding(start = 8.dp))
     }
 }

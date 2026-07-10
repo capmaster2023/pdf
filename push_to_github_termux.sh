@@ -1,31 +1,73 @@
 #!/data/data/com.termux/files/usr/bin/bash
-set -u
+# ============================================================
+# PDF Pocket Lite — Envoi du projet vers GitHub depuis Termux
+# ============================================================
+# Prérequis dans Termux :
+#   pkg install git
+# Authentification : GitHub exige un jeton d'accès personnel
+# (Personal Access Token) à la place du mot de passe.
+#   -> github.com > Settings > Developer settings >
+#      Personal access tokens > Tokens (classic) >
+#      Generate new token, coche "repo".
+# Quand git demande le mot de passe, colle le jeton.
+# ============================================================
 
-fail() { printf '\nErreur: %s\n' "$1" >&2; exit 1; }
-command -v git >/dev/null 2>&1 || fail "Git est absent. Installez-le avec: pkg update && pkg install git"
-[ -f settings.gradle.kts ] && [ -f app/build.gradle.kts ] || fail "Lancez ce script depuis le dossier racine de PDF Pocket Lite."
+set -e
 
-read -r -p "Nom d’utilisateur GitHub: " GITHUB_USER
-read -r -p "Nom du dépôt GitHub: " REPO_NAME
-[ -n "$GITHUB_USER" ] && [ -n "$REPO_NAME" ] || fail "Le nom d’utilisateur et le dépôt sont obligatoires."
-
-if [ ! -d .git ]; then git init || fail "Impossible d’initialiser Git."; fi
-git branch -M main || fail "Impossible de configurer la branche main."
-
-git add . || fail "Impossible d’ajouter les fichiers."
-if git diff --cached --quiet; then
-  echo "Aucun nouveau changement à valider."
-else
-  git commit -m "Initial PDF Pocket Lite project" || fail "Le commit a échoué. Configurez git config user.name et user.email."
+if ! command -v git > /dev/null 2>&1; then
+    echo "Erreur : git n'est pas installé. Lance : pkg install git"
+    exit 1
 fi
 
-REMOTE="https://github.com/${GITHUB_USER}/${REPO_NAME}.git"
-if git remote get-url origin >/dev/null 2>&1; then
-  git remote set-url origin "$REMOTE" || fail "Impossible de mettre à jour origin."
-else
-  git remote add origin "$REMOTE" || fail "Impossible d’ajouter origin."
+echo "== PDF Pocket Lite : envoi vers GitHub =="
+read -r -p "Ton nom d'utilisateur GitHub : " GH_USER
+read -r -p "Nom du dépôt (ex: pdf-pocket-lite) : " GH_REPO
+
+if [ -z "$GH_USER" ] || [ -z "$GH_REPO" ]; then
+    echo "Erreur : utilisateur et dépôt obligatoires."
+    exit 1
 fi
 
-echo "GitHub demandera une authentification. Utilisez un token personnel, GitHub CLI ou un gestionnaire d’identifiants. Ne mettez jamais le token dans ce script."
-git push -u origin main || fail "Push refusé. Vérifiez que le dépôt existe, que le token a accès au dépôt et que l’URL est correcte."
-echo "Projet envoyé. Ouvrez maintenant l’onglet Actions du dépôt."
+echo ""
+echo "IMPORTANT : crée d'abord le dépôt VIDE sur github.com"
+echo "(bouton New, nom: $GH_REPO, sans README ni .gitignore)."
+read -r -p "Appuie sur Entrée quand le dépôt est créé... " _
+
+if [ ! -d .git ]; then
+    git init
+    git branch -M main 2> /dev/null || git checkout -b main
+fi
+
+if [ -z "$(git config user.email)" ]; then
+    read -r -p "Ton courriel pour les commits : " GH_EMAIL
+    git config user.email "$GH_EMAIL"
+    git config user.name "$GH_USER"
+fi
+
+git add -A
+git commit -m "PDF Pocket Lite v0.1.0 - version initiale" || echo "Rien de nouveau à valider."
+
+REMOTE_URL="https://github.com/$GH_USER/$GH_REPO.git"
+if git remote get-url origin > /dev/null 2>&1; then
+    git remote set-url origin "$REMOTE_URL"
+else
+    git remote add origin "$REMOTE_URL"
+fi
+
+echo ""
+echo "Envoi vers $REMOTE_URL"
+echo "(nom d'utilisateur = $GH_USER, mot de passe = ton JETON GitHub)"
+if git push -u origin main; then
+    echo ""
+    echo "== Terminé =="
+    echo "1. Va sur github.com/$GH_USER/$GH_REPO/actions"
+    echo "2. Attends la fin du workflow « Build APK » (~5 min)"
+    echo "3. Ouvre le run, section Artifacts, télécharge"
+    echo "   pdf-pocket-lite-debug-apk, dézippe et installe l'APK."
+else
+    echo ""
+    echo "Échec de l'envoi. Vérifie :"
+    echo " - que le dépôt existe et est vide"
+    echo " - ton jeton (portée repo) et ton nom d'utilisateur"
+    exit 1
+fi

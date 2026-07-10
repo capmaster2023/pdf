@@ -1,68 +1,115 @@
 package com.pdfpocket.lite.features.tools
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
+import androidx.compose.material.icons.filled.CallMerge
+import androidx.compose.material.icons.filled.ContentCut
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.pdfpocket.lite.R
-
-data class ToolItem(val operation: String, val title: Int, val icon: ImageVector)
+import com.pdfpocket.lite.navigation.Routes
 
 @Composable
-fun ToolsScreen(
-    onTool: (String) -> Unit,
-    onImages: () -> Unit,
-    onScanner: () -> Unit,
-    onOcr: () -> Unit,
-    onSignature: () -> Unit
+fun ToolsScreen(onOpenTool: (String) -> Unit) {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        item {
+            Text(
+                text = stringResource(R.string.tab_tools),
+                style = MaterialTheme.typography.headlineMedium
+            )
+        }
+        item {
+            ToolCard(
+                icon = Icons.Default.CallMerge,
+                title = stringResource(R.string.action_merge),
+                description = stringResource(R.string.tool_merge_description),
+                onClick = { onOpenTool(Routes.MERGE) }
+            )
+        }
+        item {
+            ToolCard(
+                icon = Icons.Default.ContentCut,
+                title = stringResource(R.string.action_extract_pages),
+                description = stringResource(R.string.tool_split_description),
+                onClick = { onOpenTool(Routes.SPLIT) }
+            )
+        }
+        item {
+            ToolCard(
+                icon = Icons.Default.Image,
+                title = stringResource(R.string.action_images_to_pdf),
+                description = stringResource(R.string.tool_images_description),
+                onClick = { onOpenTool(Routes.IMAGES_TO_PDF) }
+            )
+        }
+        item {
+            Text(
+                text = stringResource(R.string.tools_coming_soon_title),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(top = 12.dp)
+            )
+        }
+        item {
+            Text(
+                text = stringResource(R.string.tools_coming_soon_body),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
+private fun ToolCard(
+    icon: ImageVector,
+    title: String,
+    description: String,
+    onClick: () -> Unit
 ) {
-    val tools = listOf(
-        ToolItem("merge", R.string.merge_pdf, Icons.Default.CallMerge),
-        ToolItem("split", R.string.split_pdf, Icons.Default.CallSplit),
-        ToolItem("rotate", R.string.rotate_pdf, Icons.Default.RotateRight),
-        ToolItem("compress", R.string.compress_pdf, Icons.Default.Compress),
-        ToolItem("watermark", R.string.watermark, Icons.Default.BrandingWatermark),
-        ToolItem("numbers", R.string.page_numbers, Icons.Default.FormatListNumbered),
-        ToolItem("protect", R.string.protect_pdf, Icons.Default.Lock),
-        ToolItem("unlock", R.string.unlock_pdf, Icons.Default.LockOpen),
-        ToolItem("pdf_to_images", R.string.pdf_to_images, Icons.Default.Image),
-        ToolItem("extract_images", R.string.extract_images, Icons.Default.Collections),
-        ToolItem("forms", R.string.forms, Icons.Default.ListAlt)
-    )
-    Column(Modifier.fillMaxSize().padding(16.dp)) {
-        Text(stringResource(R.string.tools), style = MaterialTheme.typography.headlineMedium)
-        Spacer(Modifier.height(12.dp))
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            AssistChip(onClick = onScanner, label = { Text(stringResource(R.string.scan_document)) }, leadingIcon = { Icon(Icons.Default.DocumentScanner, null) })
-            AssistChip(onClick = onImages, label = { Text(stringResource(R.string.images_to_pdf)) }, leadingIcon = { Icon(Icons.Default.Collections, null) })
-        }
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            AssistChip(onClick = onOcr, label = { Text(stringResource(R.string.ocr)) }, leadingIcon = { Icon(Icons.Default.TextFields, null) })
-            AssistChip(onClick = onSignature, label = { Text(stringResource(R.string.signature)) }, leadingIcon = { Icon(Icons.Default.Draw, null) })
-        }
-        LazyVerticalGrid(
-            columns = GridCells.Adaptive(150.dp),
-            modifier = Modifier.weight(1f),
-            contentPadding = PaddingValues(top = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            items(tools, key = { it.operation }) { tool ->
-                ElevatedCard(onClick = { onTool(tool.operation) }, modifier = Modifier.height(110.dp)) {
-                    Column(Modifier.padding(14.dp)) {
-                        Icon(tool.icon, contentDescription = stringResource(tool.title))
-                        Spacer(Modifier.height(10.dp))
-                        Text(stringResource(tool.title), style = MaterialTheme.typography.titleSmall)
-                    }
-                }
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary
+            )
+            Column(modifier = Modifier.padding(start = 16.dp)) {
+                Text(text = title, style = MaterialTheme.typography.titleMedium)
+                Text(
+                    text = description,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
     }

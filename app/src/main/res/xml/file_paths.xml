@@ -1,7 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<paths xmlns:android="http://schemas.android.com/apk/res/android">
+<paths>
     <cache-path name="shared" path="shared/" />
-    <cache-path name="scanner" path="scanner/" />
-    <cache-path name="working" path="working/" />
-    <files-path name="files" path="." />
 </paths>

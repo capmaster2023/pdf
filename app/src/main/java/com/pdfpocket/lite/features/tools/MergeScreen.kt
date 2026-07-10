@@ -48,18 +48,23 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
-class ImagesToPdfViewModel(private val container: AppContainer) : ViewModel() {
+class MergeViewModel(private val container: AppContainer) : ViewModel() {
 
-    data class Item(val uri: Uri, val name: String)
+    data class Item(val uri: Uri, val name: String, val pageCount: Int)
 
     val items = MutableStateFlow<List<Item>>(emptyList())
     val status = MutableStateFlow<ToolStatus>(ToolStatus.Idle)
 
     fun addUris(uris: List<Uri>) {
         viewModelScope.launch(Dispatchers.IO) {
-            val added = uris.map { uri ->
-                val (name, _) = FileUtils.queryMeta(container.app, uri)
-                Item(uri, name)
+            val added = uris.mapNotNull { uri ->
+                try {
+                    val (name, _) = FileUtils.queryMeta(container.app, uri)
+                    val pages = PdfToolbox.pageCount(container.app, uri)
+                    Item(uri, name, pages)
+                } catch (_: Exception) {
+                    null
+                }
             }
             items.value = items.value + added
         }
@@ -84,15 +89,13 @@ class ImagesToPdfViewModel(private val container: AppContainer) : ViewModel() {
         }
     }
 
-    fun convert(output: Uri) {
+    fun merge(output: Uri, outputName: String) {
         viewModelScope.launch(Dispatchers.IO) {
             status.value = ToolStatus.Working
             status.value = try {
-                PdfToolbox.imagesToPdf(container.app, items.value.map { it.uri }, output)
-                ToolStatus.Done(output, "images.pdf")
+                PdfToolbox.merge(container.app, items.value.map { it.uri }, output)
+                ToolStatus.Done(output, outputName)
             } catch (_: Exception) {
-                ToolStatus.Error
-            } catch (_: OutOfMemoryError) {
                 ToolStatus.Error
             }
         }
@@ -108,23 +111,23 @@ class ImagesToPdfViewModel(private val container: AppContainer) : ViewModel() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ImagesToPdfScreen(onBack: () -> Unit) {
-    val viewModel = appViewModel { ImagesToPdfViewModel(it) }
+fun MergeScreen(onBack: () -> Unit) {
+    val viewModel = appViewModel { MergeViewModel(it) }
     val items by viewModel.items.collectAsStateWithLifecycle()
     val status by viewModel.status.collectAsStateWithLifecycle()
 
-    val pickImages = rememberLauncherForActivityResult(
+    val pickPdfs = rememberLauncherForActivityResult(
         ActivityResultContracts.OpenMultipleDocuments()
     ) { uris -> if (uris.isNotEmpty()) viewModel.addUris(uris) }
 
     val createOutput = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument("application/pdf")
-    ) { uri -> if (uri != null) viewModel.convert(uri) }
+    ) { uri -> if (uri != null) viewModel.merge(uri, "fusion.pdf") }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.action_images_to_pdf)) },
+                title = { Text(stringResource(R.string.action_merge)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
@@ -145,15 +148,15 @@ fun ImagesToPdfScreen(onBack: () -> Unit) {
         ) {
             item {
                 Text(
-                    text = stringResource(R.string.images_instructions),
+                    text = stringResource(R.string.merge_instructions),
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
             item {
-                OutlinedButton(onClick = { pickImages.launch(arrayOf("image/*")) }) {
+                OutlinedButton(onClick = { pickPdfs.launch(arrayOf("application/pdf")) }) {
                     Icon(Icons.Default.Add, contentDescription = null)
                     Text(
-                        text = stringResource(R.string.add_images),
+                        text = stringResource(R.string.add_pdfs),
                         modifier = Modifier.padding(start = 8.dp)
                     )
                 }
@@ -167,13 +170,19 @@ fun ImagesToPdfScreen(onBack: () -> Unit) {
                             .padding(8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = (index + 1).toString() + ". " + item.name,
-                            modifier = Modifier.weight(1f),
-                            style = MaterialTheme.typography.bodyLarge,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = item.name,
+                                style = MaterialTheme.typography.bodyLarge,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                            Text(
+                                text = stringResource(R.string.pages_count, item.pageCount),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                         IconButton(onClick = { viewModel.move(index, -1) }) {
                             Icon(
                                 Icons.Default.KeyboardArrowUp,
@@ -210,7 +219,7 @@ fun ImagesToPdfScreen(onBack: () -> Unit) {
                     is ToolStatus.Done -> {
                         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             Text(
-                                text = stringResource(R.string.images_done),
+                                text = stringResource(R.string.merge_done),
                                 color = MaterialTheme.colorScheme.primary
                             )
                             OutlinedButton(onClick = { viewModel.shareResult() }) {
@@ -232,10 +241,10 @@ fun ImagesToPdfScreen(onBack: () -> Unit) {
 
                     is ToolStatus.Idle -> {
                         Button(
-                            onClick = { createOutput.launch("images.pdf") },
-                            enabled = items.isNotEmpty()
+                            onClick = { createOutput.launch("fusion.pdf") },
+                            enabled = items.size >= 2
                         ) {
-                            Text(stringResource(R.string.convert_now))
+                            Text(stringResource(R.string.merge_now))
                         }
                     }
                 }

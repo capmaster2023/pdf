@@ -1,5 +1,5 @@
+# PDFBox Android
 -keep class com.tom_roush.pdfbox.** { *; }
+-dontwarn com.tom_roush.pdfbox.**
 -dontwarn org.bouncycastle.**
--dontwarn javax.imageio.**
--keep class com.google.mlkit.** { *; }
--keepattributes Signature,InnerClasses,EnclosingMethod
+-dontwarn com.gemalto.jp2.**

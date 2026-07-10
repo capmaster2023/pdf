@@ -1,135 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">PDF Pocket Lite</string>
-    <string name="home">Accueil</string>
-    <string name="documents">Documents</string>
-    <string name="tools">Outils</string>
-    <string name="settings">Paramètres</string>
-    <string name="open_pdf">Ouvrir un PDF</string>
-    <string name="scan_document">Scanner un document</string>
-    <string name="images_to_pdf">Images vers PDF</string>
-    <string name="merge_pdf">Fusionner des PDF</string>
-    <string name="split_pdf">Extraire des pages</string>
-    <string name="rotate_pdf">Faire pivoter</string>
-    <string name="compress_pdf">Compresser</string>
-    <string name="sign_pdf">Signer</string>
-    <string name="watermark">Filigrane</string>
-    <string name="page_numbers">Numéros de page</string>
-    <string name="protect_pdf">Protéger par mot de passe</string>
-    <string name="unlock_pdf">Retirer le mot de passe</string>
-    <string name="pdf_to_images">PDF vers images</string>
-    <string name="extract_images">Extraire les images</string>
-    <string name="forms">Formulaires PDF</string>
-    <string name="ocr">Reconnaissance de texte</string>
-    <string name="signature">Signature</string>
-    <string name="recent_files">Fichiers récents</string>
-    <string name="favorites">Favoris</string>
-    <string name="empty_documents">Aucun document récent</string>
-    <string name="empty_documents_hint">Ouvrez un PDF ou créez-en un pour commencer.</string>
-    <string name="search">Rechercher</string>
+
+    <!-- Navigation -->
+    <string name="tab_home">Accueil</string>
+    <string name="tab_files">Fichiers</string>
+    <string name="tab_tools">Outils</string>
+    <string name="tab_settings">Réglages</string>
+
+    <!-- Actions rapides -->
+    <string name="action_open_pdf">Ouvrir un PDF</string>
+    <string name="action_images_to_pdf">Images vers PDF</string>
+    <string name="action_merge">Fusionner des PDF</string>
+    <string name="action_extract_pages">Extraire des pages</string>
+
+    <!-- Accueil -->
+    <string name="section_favorites">Favoris</string>
+    <string name="section_recents">Récents</string>
+    <string name="empty_recents">Aucun document récent. Ouvre un PDF pour commencer.</string>
+    <string name="pages_count">%1$d pages</string>
+    <string name="favorite">Favori</string>
+
+    <!-- Fichiers -->
+    <string name="search_hint">Rechercher</string>
     <string name="sort">Trier</string>
-    <string name="sort_name">Nom</string>
-    <string name="sort_date">Date</string>
-    <string name="sort_size">Taille</string>
-    <string name="clear_history">Effacer l’historique</string>
-    <string name="unknown">Inconnu</string>
-    <string name="back">Retour</string>
-    <string name="close">Fermer</string>
+    <string name="sort_by_name">Par nom</string>
+    <string name="sort_by_date">Par date d\'ouverture</string>
+    <string name="sort_by_size">Par taille</string>
+    <string name="empty_files">Aucun document dans l\'historique.</string>
+    <string name="share">Partager</string>
+    <string name="remove_from_history">Retirer de l\'historique</string>
+    <string name="remove_from_history_message">Retirer « %1$s » de l\'historique ? Le fichier original n\'est pas supprimé.</string>
     <string name="confirm">Confirmer</string>
     <string name="cancel">Annuler</string>
-    <string name="delete">Supprimer</string>
-    <string name="duplicate">Dupliquer</string>
-    <string name="undo">Annuler la dernière action</string>
-    <string name="redo">Rétablir</string>
-    <string name="share">Partager</string>
-    <string name="processing">Traitement en cours…</string>
-    <string name="operation_complete">Opération terminée</string>
-    <string name="operation_failed">L’opération a échoué</string>
+
+    <!-- Lecteur -->
+    <string name="viewer_title">Lecteur</string>
+    <string name="back">Retour</string>
+    <string name="page_indicator">Page %1$d / %2$d</string>
+    <string name="page_number">Page %1$d</string>
+    <string name="error_protected_pdf">Ce PDF est protégé par mot de passe. La prise en charge arrive dans une prochaine version.</string>
+    <string name="error_unreadable_pdf">Impossible de lire ce document. Le fichier est peut-être corrompu ou inaccessible.</string>
+    <string name="go_to_page">Aller à la page</string>
+    <string name="go_to_page_hint">Numéro (1 à %1$d)</string>
+
+    <!-- Outils -->
+    <string name="tool_merge_description">Combiner plusieurs PDF en un seul document.</string>
+    <string name="tool_split_description">Créer un nouveau PDF à partir de pages choisies.</string>
+    <string name="tool_images_description">Convertir des photos ou images en PDF multipage.</string>
+    <string name="tools_coming_soon_title">Prochainement</string>
+    <string name="tools_coming_soon_body">Scanner avec la caméra, OCR, annotations, signature, compression et protection par mot de passe seront ajoutés dans les prochaines étapes.</string>
+
+    <!-- Fusion -->
+    <string name="merge_instructions">Ajoute au moins deux PDF, mets-les dans l\'ordre voulu, puis lance la fusion. Les fichiers originaux ne sont jamais modifiés.</string>
+    <string name="add_pdfs">Ajouter des PDF</string>
+    <string name="move_up">Monter</string>
+    <string name="move_down">Descendre</string>
+    <string name="remove">Retirer</string>
+    <string name="merge_now">Fusionner</string>
+    <string name="merge_done">Fusion terminée. Le nouveau PDF est enregistré.</string>
+
+    <!-- Extraction -->
+    <string name="split_instructions">Choisis un PDF puis indique les pages à extraire. Un nouveau document est créé, l\'original reste intact.</string>
     <string name="choose_pdf">Choisir un PDF</string>
-    <string name="choose_image">Choisir une image</string>
-    <string name="choose_folder">Choisir un dossier</string>
-    <string name="choose_output">Choisir le fichier de sortie</string>
-    <string name="add_file">Ajouter des fichiers</string>
-    <string name="create_pdf">Créer le PDF</string>
-    <string name="move_up">Déplacer vers le haut</string>
-    <string name="move_down">Déplacer vers le bas</string>
-    <string name="page_ranges">Pages ou plages</string>
-    <string name="page_ranges_hint">Exemples : 1, 1-5, 1,3,7 ou 1-4,8-10</string>
-    <string name="watermark_text">Texte du filigrane</string>
-    <string name="opacity">Opacité</string>
-    <string name="start_number">Numéro de départ</string>
-    <string name="prefix">Préfixe</string>
-    <string name="suffix">Suffixe</string>
-    <string name="password">Mot de passe</string>
-    <string name="confirm_password">Confirmer le mot de passe</string>
-    <string name="password_required">Ce PDF est protégé. Entrez son mot de passe.</string>
-    <string name="password_warning">L’application ne pourra pas récupérer ce mot de passe s’il est oublié.</string>
-    <string name="compression_warning">La compression équilibrée et forte rasterise les pages. Le texte peut ne plus être sélectionnable.</string>
-    <string name="compression_light">Légère</string>
-    <string name="compression_balanced">Équilibrée</string>
-    <string name="compression_strong">Forte</string>
-    <string name="load_form">Charger les champs du formulaire</string>
-    <string name="flatten_form">Aplatir les champs dans la copie exportée</string>
-    <string name="find_in_document">Rechercher dans le document</string>
-    <string name="continuous_mode">Affichage continu</string>
-    <string name="single_page_mode">Page par page</string>
-    <string name="previous_page">Page précédente</string>
-    <string name="next_page">Page suivante</string>
-    <string name="page_x_of_y">Page %1$d sur %2$d</string>
-    <string name="corrupted_pdf">Impossible d’ouvrir ce PDF. Il est peut-être endommagé, inaccessible ou non pris en charge.</string>
-    <string name="camera_permission_title">Autorisation de la caméra requise</string>
-    <string name="camera_permission_explanation">La caméra sert uniquement à photographier les pages. Les images restent sur l’appareil.</string>
-    <string name="grant_permission">Autoriser la caméra</string>
-    <string name="flash">Flash</string>
-    <string name="capture_page">Capturer une page</string>
-    <string name="finish_scan">Créer le PDF</string>
-    <string name="pages_captured">%1$d page(s) capturée(s)</string>
-    <string name="ocr_disclaimer">L’OCR est effectué localement. Le résultat peut contenir des erreurs et doit être vérifié.</string>
-    <string name="recognized_text">Texte reconnu</string>
-    <string name="copy_text">Copier</string>
-    <string name="share_text">Partager le texte</string>
-    <string name="save_text">Enregistrer en TXT</string>
-    <string name="visual_signature_notice">Cette fonction ajoute une signature visuelle. Elle ne crée pas une signature numérique certifiée.</string>
-    <string name="signature_name">Nom de la signature</string>
-    <string name="save_signature">Enregistrer la signature</string>
-    <string name="saved_signatures">Signatures enregistrées</string>
-    <string name="signature_page">Numéro de page</string>
-    <string name="horizontal_position">Position horizontale</string>
-    <string name="vertical_position">Position verticale</string>
-    <string name="signature_size">Taille de la signature</string>
-    <string name="theme">Thème</string>
-    <string name="theme_system">Système</string>
+    <string name="page_range_label">Pages à extraire</string>
+    <string name="page_range_example">Exemple : 1-4, 8, 10-12</string>
+    <string name="extract_now">Extraire</string>
+    <string name="split_done">Extraction terminée. Le nouveau PDF est enregistré.</string>
+
+    <!-- Images vers PDF -->
+    <string name="images_instructions">Ajoute des images, mets-les dans l\'ordre voulu, puis crée le PDF.</string>
+    <string name="add_images">Ajouter des images</string>
+    <string name="convert_now">Créer le PDF</string>
+    <string name="images_done">Conversion terminée. Le PDF est enregistré.</string>
+
+    <!-- Statuts -->
+    <string name="working">Traitement en cours…</string>
+    <string name="tool_error">Une erreur est survenue. Aucun fichier original n\'a été modifié.</string>
+
+    <!-- Réglages -->
+    <string name="theme_title">Thème</string>
+    <string name="theme_system">Suivre le système</string>
     <string name="theme_light">Clair</string>
     <string name="theme_dark">Sombre</string>
-    <string name="default_view_mode">Mode de lecture par défaut</string>
-    <string name="remember_last_page">Mémoriser la dernière page</string>
-    <string name="app_lock">Verrouillage de l’application</string>
-    <string name="biometric_lock">Verrouillage biométrique</string>
-    <string name="pin_lock">Verrouillage par code PIN</string>
-    <string name="screenshots">Captures d’écran</string>
-    <string name="allow_screenshots">Autoriser les captures d’écran</string>
-    <string name="block_screenshots">Bloquer les captures d’écran</string>
+    <string name="storage_title">Stockage</string>
     <string name="clear_cache">Vider le cache</string>
-    <string name="delete_signatures">Supprimer toutes les signatures</string>
-    <string name="reset_preferences">Réinitialiser les préférences</string>
-    <string name="set_pin">Définir un code PIN</string>
-    <string name="enter_pin">Code PIN de 4 à 12 chiffres</string>
-    <string name="privacy">Confidentialité</string>
-    <string name="privacy_body">PDF Pocket Lite fonctionne en priorité hors ligne. Les documents, signatures et textes OCR ne sont envoyés vers aucun serveur par l’application. Les URI sont mémorisées localement pour l’historique et les favoris. Les fichiers temporaires peuvent être supprimés dans les paramètres. Aucun compte, aucune publicité et aucune permission d’accès complet au stockage ne sont utilisés.</string>
-    <string name="about">À propos</string>
-    <string name="version">Version %1$s</string>
-    <string name="licenses">Bibliothèques et licences</string>
-    <string name="license_body">Application : licence MIT. PDFBox Android : Apache 2.0. AndroidX, Jetpack Compose, CameraX, Room, Hilt, WorkManager et ML Kit sont utilisés selon leurs licences respectives. Voir le README pour les liens et limites techniques.</string>
-    <string name="biometric_prompt_title">Déverrouiller PDF Pocket Lite</string>
-    <string name="biometric_prompt_subtitle">Utilisez la biométrie ou le verrouillage de l’appareil.</string>
-    <string name="unlock">Déverrouiller</string>
-    <string name="invalid_pin">Code PIN incorrect</string>
-    <string name="paper_auto">Automatique</string>
-    <string name="paper_a4">A4</string>
-    <string name="paper_letter">Lettre</string>
-    <string name="orientation_portrait">Portrait</string>
-    <string name="orientation_landscape">Paysage</string>
-    <string name="margins">Marges</string>
-    <string name="file_unavailable">Le fichier n’est plus accessible.</string>
-    <string name="no_form">Aucun formulaire AcroForm compatible n’a été détecté.</string>
-    <string name="technical_limit">Fonction limitée par le moteur PDF utilisé. Le fichier original n’est jamais modifié.</string>
+    <string name="clear_history">Effacer l\'historique</string>
+    <string name="clear_history_message">Effacer tout l\'historique et les favoris ? Les fichiers originaux ne sont pas supprimés.</string>
+    <string name="privacy_title">Confidentialité</string>
+    <string name="privacy_body">Tout se passe sur ton appareil. L\'application ne demande aucune permission Internet et n\'envoie aucune donnée.</string>
+    <string name="about_version">PDF Pocket Lite — version %1$s</string>
 </resources>

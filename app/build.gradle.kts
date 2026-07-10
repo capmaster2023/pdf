@@ -65,9 +65,9 @@ android {
 
 kapt { correctErrorTypes = true }
 
-val composeBom = platform("androidx.compose:compose-bom:2024.12.01")
 
 dependencies {
+    val composeBom = platform("androidx.compose:compose-bom:2024.12.01")
     implementation(composeBom)
     androidTestImplementation(composeBom)
 
